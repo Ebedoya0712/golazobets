@@ -1,0 +1,52 @@
+config:
+  target: "https://golazobets-development-rlky4d.laravel.cloud"
+  phases:
+    - name: "Warm up"
+      duration: 30
+      arrivalRate: 5
+    - name: "Peak load"
+      duration: 120
+      arrivalRate: 10
+  payload:
+    path: "users.csv"
+    fields:
+      - "username"
+      - "password"
+  defaults:
+    headers:
+      Accept: "application/json, text/html"
+      Content-Type: "application/json"
+
+scenarios:
+  - name: "User journey with auth"
+    flow:
+      - get:
+          url: "/login"
+          capture:
+            - selector: "meta[name='csrf-token']"
+              attr: "content"
+              as: "csrf"
+      - post:
+          url: "/login"
+          headers:
+            X-CSRF-TOKEN: "{{ csrf }}"
+          json:
+            email: "{{ username }}"
+            password: "{{ password }}"
+          expect:
+            - statusCode: 200
+      - think: 2
+      - get:
+          url: "/free-picks"
+          expect:
+            - statusCode: 200
+      - think: 2
+      - get:
+          url: "/tipsters/free"
+          expect:
+            - statusCode: 200
+      - think: 2
+      - get:
+          url: "/tipsters/premium"
+          expect:
+            - statusCode: 200
