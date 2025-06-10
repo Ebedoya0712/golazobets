@@ -25,7 +25,7 @@ export const GuestFooter = () => {
 					<em className="bg-primary-300 w-px" />
 					<Link href={route('cookiesPolicy')}>Política de cookies</Link>
 					<em className="bg-primary-300 w-px" />
-					<Link href={route('betResponsibly')}>Juega con responsabilidad</Link>
+					<Link href={route('betResponsibly')}>Normas y Buenas Prácticas</Link>
 				</nav>
 
 				<div className="flex flex-col items-center gap-5 mt-10 sm:mt-0 md:mt-1 md:flex-row">
