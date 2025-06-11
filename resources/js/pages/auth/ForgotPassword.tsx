@@ -49,7 +49,7 @@ const Page = ({ status, layout }: Props) => {
 
 	return (
 		<>
-			<div className="w-72 space-y-7">
+			<div className="w-96 space-y-7">	
 				<div className="text-sm leading-tight">
 					{t('forgot-password-message')}
 				</div>
