@@ -12,6 +12,17 @@ interface Props {
 
 const pageTitle = 'Forgot your password?'
 
+const mensajesStatus = {
+  "We have emailed your password reset link.": "Te hemos enviado un enlace para restablecer tu contraseña.",
+  // más traducciones si quieres
+}
+
+const mensajesErrores = {
+  "The email field is required.": "El campo email es obligatorio.",
+  "The email must be a valid email address.": "El email debe ser una dirección válida.",
+  // agrega aquí más errores que quieras traducir
+}
+
 const Page = ({ status, layout }: Props) => {
 	const { data, setData, post, processing, errors, reset } = useForm({
 		email: '',
@@ -31,6 +42,11 @@ const Page = ({ status, layout }: Props) => {
 		})
 	}
 
+  // Función para traducir mensajes de error si existen
+  const traducirError = (errorMsg: string) => {
+    return mensajesErrores[errorMsg] ?? errorMsg
+  }
+
 	return (
 		<>
 			<div className="w-72 space-y-7">
@@ -38,7 +54,7 @@ const Page = ({ status, layout }: Props) => {
 					{t('forgot-password-message')}
 				</div>
 
-				{status && <StatusMessage {...{ status }} />}
+				{status && <StatusMessage status={mensajesStatus[status] ?? status} />}
 
 				<form onSubmit={submit}>
 					<div className="space-y-4">
@@ -52,7 +68,7 @@ const Page = ({ status, layout }: Props) => {
 								isDisabled={processing}
 								ref={inputEmail}
 								isInvalid={errors.email ? true : false}
-								errorMessage={errors.email}
+								errorMessage={errors.email ? traducirError(errors.email) : undefined}
 								onValueChange={(e) => setData('email', e)}
 								autoComplete="off"
 							/>
