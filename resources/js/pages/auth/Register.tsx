@@ -185,15 +185,15 @@ const Page = ({ layout, sports }: Props) => {
 							>
 								Acepto las{' '}
 								<a
-									href="/"
+									href="/legal"
 									className="text-primary hover:underline"
 									target="_blank"
 								>
-									condiciones de uso
+									Condiciones generales
 								</a>
 								,{' '}
 								<a
-									href="/"
+									href="/privacy"
 									className="text-primary hover:underline"
 									target="_blank"
 								>
@@ -201,11 +201,11 @@ const Page = ({ layout, sports }: Props) => {
 								</a>{' '}
 								y{' '}
 								<a
-									href="/"
+									href="/bet-responsibly"
 									className="text-primary hover:underline"
 									target="_blank"
 								>
-									normas generales
+									Normas y buenas prácticas
 								</a>
 								.
 							</Checkbox>
