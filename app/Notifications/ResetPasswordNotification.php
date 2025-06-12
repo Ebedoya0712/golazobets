@@ -2,64 +2,29 @@
 
 namespace App\Notifications;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use App\Models\EmailTemplate;
-use App\Traits\NotificationTrait;
+use Illuminate\Notifications\Messages\MailMessage;
 
-class ResetPasswordNotification extends Notification implements ShouldQueue
+class ResetPasswordNotification extends Notification
 {
-	use Queueable, NotificationTrait;
+    public $resetUrl;
 
-	/**
-	 * Create a new notification instance.
-	 */
-	public function __construct(
-		private readonly string $resetUrl
-	) {
-		//
-	}
+    public function __construct($resetUrl)
+    {
+        $this->resetUrl = $resetUrl;
+    }
 
-	/**
-	 * Get the notification's delivery channels.
-	 *
-	 * @return array<int, string>
-	 */
-	public function via(object $notifiable): array
-	{
-		return ['mail'];
-	}
+    public function via($notifiable)
+    {
+        return ['mail'];
+    }
 
-	/**
-	 * Get the mail representation of the notification.
-	 */
-	public function toMail(object $notifiable): MailMessage
-	{
-		$template = EmailTemplate::where('type', $this->getNameSpaceAndFileName())->first();
-
-		if (str_contains($template->body, '[url]')) {
-			$template->body = str_replace('[url]', $this->resetUrl, $template->body);
-		}
-
-		return (new MailMessage)
-			->subject($template->subject ?? 'Reset password notification')
-			->markdown('mail::message', [
-				'content' => $template->body ?? '',
-				'slot' => ''
-			]);
-	}
-
-	/**
-	 * Get the array representation of the notification.
-	 *
-	 * @return array<string, mixed>
-	 */
-	public function toArray(object $notifiable): array
-	{
-		return [
-			//
-		];
-	}
+    public function toMail($notifiable)
+    {
+        return (new MailMessage)
+            ->subject('Restablecer Contraseña - ' . config('app.name'))
+            ->line('Estás recibiendo este correo porque recibimos una solicitud de restablecimiento de contraseña para tu cuenta.')
+            ->action('Restablecer Contraseña', $this->resetUrl)
+            ->line('Si no solicitaste un restablecimiento de contraseña, ignora este mensaje.');
+    }
 }

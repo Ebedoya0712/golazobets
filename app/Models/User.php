@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Contracts\Auth\CanResetPassword;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Auth\Passwords\CanResetPassword as CanResetPasswordTrait;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Spatie\Permission\Traits\HasRoles;
 use Lab404\Impersonate\Models\Impersonate;
 use App\Notifications\ResetPasswordNotification;
@@ -20,221 +22,117 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Laravel\Cashier\Billable;
 
-class User extends Authenticatable implements MustVerifyEmail, HasMedia
+class User extends Authenticatable implements MustVerifyEmail, HasMedia, CanResetPassword
 {
-	use HasFactory;
-	use Notifiable;
-	use HasRoles;
-	use Impersonate;
-	use InteractsWithMedia;
-	use Billable;
+    use HasFactory, Notifiable, HasRoles, Impersonate, InteractsWithMedia, Billable, CanResetPasswordTrait;
 
-	/**
-	 * The attributes that are mass assignable.
-	 *
-	 * @var array<int, string>
-	 */
-	protected $fillable = [
-		// Basic information
-		'name',
-		'lastname',
-		'username',
-		'email',
-		'password',
-		'country',
+    protected $fillable = [
+        'name',
+        'lastname',
+        'username',
+        'email',
+        'password',
+        'country',
+        'profile_picture',
+        'status',
+    ];
 
-		// Preferences
-		'profile_picture',
-		'status',
-	];
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
 
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+        ];
+    }
 
-	protected $hidden = [
-		'password',
-		'remember_token',
-	];
+    public function sessions(): HasMany
+    {
+        return $this->hasMany(Session::class);
+    }
 
+    public function canImpersonate(): bool
+    {
+        if (config('settings.general.admin_can_impersonate')) {
+            return $this->hasRole(['Admin', 'Super Admin']);
+        } else {
+            return $this->hasRole('Super Admin');
+        }
+    }
 
-	/**
-	 * The attributes that should be cast to native types.
-	 *
-	 * @return array
-	 */
-	protected function casts(): array
-	{
-		return [
-			'email_verified_at' => 'datetime',
-			'password' => 'hashed',
-		];
-	}
+    public function account(): HasOne
+    {
+        return $this->hasOne(Account::class);
+    }
 
-	/**
-	 * Get the sessions associated with the user.
-	 *
-	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
-	 */
-	public function sessions()
-	{
-		return $this->hasMany(Session::class);
-	}
+    public function getRoles(): array
+    {
+        return $this->roles->map(fn($role) => ['id' => $role->id, 'name' => $role->name])->toArray();
+    }
 
-	/**
-	 * Determine if the user can impersonate other users.
-	 *
-	 * @return bool True if the user has impersonation rights, false otherwise.
-	 */
-	public function canImpersonate(): bool
-	{
-		if (config('settings.general.admin_can_impersonate')) {
-			return $this->hasRole(['Admin', 'Super Admin']);
-		} else {
-			return $this->hasRole('Super Admin');
-		}
-	}
+    public function getAccount(): AccountData
+    {
+        return AccountData::from($this->account->toArray());
+    }
 
-	/**
-	 * Get the account associated with the user.
-	 *
-	 * @return \Illuminate\Database\Eloquent\Relations\HasOne
-	 */
-	public function account()
-	{
-		return $this->hasOne(Account::class);
-	}
+    public function sendPasswordResetNotification($token): void
+    {
+        $base_url = rtrim(config('app.url'), '/');
+        $url = "$base_url/reset-password/$token";
 
+        $this->notify(new ResetPasswordNotification($url));
+    }
 
-	/**
-	 * Get the user's roles.
-	 *
-	 * @return array An array of the user's roles.
-	 */
-	public function getRoles(): array
-	{
-		return $this->roles->map(fn($role) => ['id' => $role->id, 'name' => $role->name])->toArray();
-	}
+    private function generateVerificationUrl(): string
+    {
+        return URL::temporarySignedRoute(
+            'verification.verify',
+            now()->addMinutes(config('auth.verification.expire', 60)),
+            ['id' => $this->getKey(), 'hash' => sha1($this->getEmailForVerification())]
+        );
+    }
 
+    public function sendEmailVerificationNotification()
+    {
+        $url = $this->generateVerificationUrl();
+        $this->notify(new EmailVerificationNotification($url));
+    }
 
-	/**
-	 * Get the user's account data.
-	 *
-	 * @return \App\Data\AccountData The user's account data.
-	 */
-	public function getAccount(): AccountData
-	{
-		return AccountData::from($this->account->toArray());
-	}
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('images');
+        $this->addMediaCollection('files');
+    }
 
+    public function registerMediaConversions(?Media $media = null): void
+    {
+        $this
+            ->addMediaConversion('webp')
+            ->format('webp')
+            ->performOnCollections('images')
+            ->nonQueued();
 
-	/**
-	 * Send a password reset notification to the user.
-	 *
-	 * @param  string  $token
-	 */
-	public function sendPasswordResetNotification($token): void
-	{
-		$base_url = rtrim(config('app.url'), '/');
-		$url = "$base_url/reset-password/$token";
+        $this
+            ->addMediaConversion('preview')
+            ->format('webp')
+            ->performOnCollections('images')
+            ->fit(Fit::Contain, 300, 300)
+            ->nonQueued();
+    }
 
-		$this->notify(new ResetPasswordNotification($url));
-	}
+    public function tipster(): HasOne
+    {
+        return $this->hasOne(Tipster::class);
+    }
 
-
-
-	/**
-	 * Generate a signed URL for the user to verify their email address.
-	 *
-	 * The generated URL is a temporary signed route that is only valid for the
-	 * specified duration defined in the authentication configuration. The URL
-	 * contains the user's ID and a hash of their email address.
-	 *
-	 * @return string The signed URL used to verify the user's email address.
-	 */
-	private function generateVerificationUrl(): string
-	{
-		return URL::temporarySignedRoute(
-			'verification.verify',
-			now()->addMinutes(config('auth.verification.expire', 60)),
-			['id' => $this->getKey(), 'hash' => sha1($this->getEmailForVerification())]
-		);
-	}
-
-
-	/**
-	 * Send the email verification notification.
-	 *
-	 * This method generates a signed URL containing the user's ID and
-	 * a hash of their email address. The URL is then used to verify the
-	 * user's email address and is only valid for the specified duration
-	 * defined in the authentication configuration.
-	 */
-	public function sendEmailVerificationNotification()
-	{
-		$url = $this->generateVerificationUrl();
-		$this->notify(new EmailVerificationNotification($url));
-	}
-
-
-	/**
-	 * Register media collections for the user.
-	 *
-	 * This method defines two media collections: 'images' and 'files'.
-	 * These collections can be used to organize and store media files
-	 * associated with the user.
-	 */
-
-	public function registerMediaCollections(): void
-	{
-		$this->addMediaCollection('images');
-		$this->addMediaCollection('files');
-	}
-
-
-	/**
-	 * Register media conversions for the user.
-	 *
-	 * This method adds a 'preview' media conversion that fits the media
-	 * within a 300x300 dimension while maintaining the aspect ratio.
-	 * The conversion is set to be non-queued.
-	 *
-	 * @param \Spatie\MediaLibrary\MediaCollections\Models\Media|null $media
-	 */
-
-	public function registerMediaConversions(?Media $media = null): void
-	{
-		$this
-			->addMediaConversion('webp')
-			->format('webp')
-			->performOnCollections('images')
-			->nonQueued();
-
-		$this
-			->addMediaConversion('preview')
-			->format('webp')
-			->performOnCollections('images')
-			->fit(Fit::Contain, 300, 300)
-			->nonQueued();
-	}
-
-
-
-	/**
-	 * Get the tipster that owns the User
-	 *
-	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-	 */
-	public function tipster(): HasOne
-	{
-		return $this->hasOne(Tipster::class);
-	}
-
-
-	/**
-	 * Get all of the subscriptions for the User
-	 */
-	public function subscriptions(): HasMany
-	{
-		return $this->hasMany(Subscription::class)
-			->where('ends_at', NULL)
-			->whereNot('stripe_status', 'canceled');
-	}
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(Subscription::class)
+            ->whereNull('ends_at')
+            ->where('stripe_status', '!=', 'canceled');
+    }
 }

@@ -1,4 +1,4 @@
-import { useRef, useEffect, FormEventHandler } from 'react'
+import { useRef, useEffect, useState, FormEventHandler } from 'react'
 import { Link, useForm } from '@inertiajs/react'
 import { t } from '@/i18n'
 import { Input, Button } from '@nextui-org/react'
@@ -6,7 +6,7 @@ import { AuthLayout1, AuthLayout2, AuthLayout3 } from '@/layouts/auth'
 import { StatusMessage } from './components'
 
 interface Props {
-	status: string
+	status: string | null
 	layout: string
 }
 
@@ -14,6 +14,7 @@ const pageTitle = 'Forgot your password?'
 
 const mensajesStatus = {
   "We have emailed your password reset link.": "Te hemos enviado un enlace para restablecer tu contraseña.",
+  "Correo de recuperación enviado correctamente.": "Correo de recuperación enviado correctamente.",
   // más traducciones si quieres
 }
 
@@ -29,6 +30,7 @@ const Page = ({ status, layout }: Props) => {
 	})
 
 	const inputEmail = useRef<HTMLInputElement>(null)
+	const [localStatus, setLocalStatus] = useState<string | null>(status || null)
 
 	useEffect(() => {
 		inputEmail.current?.focus()
@@ -38,23 +40,25 @@ const Page = ({ status, layout }: Props) => {
 		e.preventDefault()
 
 		post(route('password.email'), {
-			onSuccess: () => reset(),
+			onSuccess: (page) => {
+				setLocalStatus(page.props.status || null)
+				reset()
+			},
 		})
 	}
 
-  // Función para traducir mensajes de error si existen
-  const traducirError = (errorMsg: string) => {
-    return mensajesErrores[errorMsg] ?? errorMsg
-  }
+	const traducirError = (errorMsg: string) => {
+		return mensajesErrores[errorMsg] ?? errorMsg
+	}
 
 	return (
 		<>
-			<div className="w-96 space-y-7">	
+			<div className="w-96 space-y-7">
 				<div className="text-sm leading-tight">
 					{t('forgot-password-message')}
 				</div>
 
-				{status && <StatusMessage status={mensajesStatus[status] ?? status} />}
+				{localStatus && <StatusMessage status={mensajesStatus[localStatus] ?? localStatus} />}
 
 				<form onSubmit={submit}>
 					<div className="space-y-4">
@@ -67,7 +71,7 @@ const Page = ({ status, layout }: Props) => {
 								value={data.email}
 								isDisabled={processing}
 								ref={inputEmail}
-								isInvalid={errors.email ? true : false}
+								isInvalid={Boolean(errors.email)}
 								errorMessage={errors.email ? traducirError(errors.email) : undefined}
 								onValueChange={(e) => setData('email', e)}
 								autoComplete="off"
@@ -122,27 +126,19 @@ Page.layout = (page: JSX.Element) => {
 	switch (page.props.layout) {
 		case 'layout1':
 			return (
-				<AuthLayout1
-					{...{ children: page, pageTitle: t(pageTitle).toString() }}
-				/>
+				<AuthLayout1 {...{ children: page, pageTitle: t(pageTitle).toString() }} />
 			)
 		case 'layout2':
 			return (
-				<AuthLayout2
-					{...{ children: page, pageTitle: t(pageTitle).toString() }}
-				/>
+				<AuthLayout2 {...{ children: page, pageTitle: t(pageTitle).toString() }} />
 			)
 		case 'layout3':
 			return (
-				<AuthLayout3
-					{...{ children: page, pageTitle: t(pageTitle).toString() }}
-				/>
+				<AuthLayout3 {...{ children: page, pageTitle: t(pageTitle).toString() }} />
 			)
 		default:
 			return (
-				<AuthLayout1
-					{...{ children: page, pageTitle: t(pageTitle).toString() }}
-				/>
+				<AuthLayout1 {...{ children: page, pageTitle: t(pageTitle).toString() }} />
 			)
 	}
 }
