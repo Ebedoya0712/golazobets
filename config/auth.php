@@ -18,6 +18,15 @@ return [
 		'passwords' => env('AUTH_PASSWORD_BROKER', 'users'),
 	],
 
+    'passwords' => [
+    'users' => [
+        'provider' => 'users',
+        'table' => 'password_resets',  // debe existir en la BD
+        'expire' => 60,
+        'throttle' => 60,
+    ],
+],
+
 	/*
     |--------------------------------------------------------------------------
     | Authentication Guards

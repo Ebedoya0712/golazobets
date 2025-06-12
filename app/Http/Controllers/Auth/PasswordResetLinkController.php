@@ -7,18 +7,18 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\ValidationException;
-use Inertia\Inertia;
-use Inertia\Response;
 use Illuminate\Support\Facades\Mail;
+use App\Mail\ResetPasswordMail;
+use Inertia\Inertia;
 use App\Mail\PasswordResetMail;
-use Illuminate\Support\Facades\Log;
+use Inertia\Response;
 
 class PasswordResetLinkController extends Controller
 {
-    /**
-     * Display the password reset link request view.
-     */
-    public function create(): Response
+	/**
+	 * Display the password reset link request view.
+	 */
+	public function create(): Response
     {
         $layout = config('settings.general.auth_layout');
         $status = session('status');
@@ -27,9 +27,7 @@ class PasswordResetLinkController extends Controller
     }
 
     /**
-     * Handle an incoming password reset link request using SMTP/Gmail.
-     *
-     * @throws \Illuminate\Validation\ValidationException
+     * Manejar la solicitud para enviar el enlace de restablecimiento de contraseña.
      */
     public function store(Request $request): RedirectResponse
     {
@@ -37,38 +35,15 @@ class PasswordResetLinkController extends Controller
             'email' => 'required|email',
         ]);
 
-        try {
-            // Enviar correo usando SMTP
-            $status = Password::sendResetLink(
-                $request->only('email')
-            );
+        $status = Password::sendResetLink(
+            $request->only('email')
+        );
 
-            if ($status == Password::RESET_LINK_SENT) {
-                Log::info('Correo de recuperación enviado', [
-                    'email' => $request->email,
-                    'status' => $status
-                ]);
-                return back()->with('status', __($status));
-            }
-
-            Log::error('Error al enviar correo de recuperación', [
-                'email' => $request->email,
-                'status' => $status
-            ]);
-
-            throw ValidationException::withMessages([
-                'email' => [trans($status)],
-            ]);
-
-        } catch (\Exception $e) {
-            Log::error('Excepción al enviar correo SMTP', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-
-            throw ValidationException::withMessages([
-                'email' => ['Error al enviar el correo. Por favor intente más tarde.'],
-            ]);
+        if ($status === Password::RESET_LINK_SENT) {
+            return back()->with('status', __($status));
+        } else {
+            return back()->withErrors(['email' => __($status)]);
         }
     }
+
 }
