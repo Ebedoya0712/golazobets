@@ -64,29 +64,31 @@ export const TipsterCard = ({ tipster, classNames }: Props) => {
 
 			<div className="h-[60px] px-2 pt-1 pb-4 grid grid-cols-3 gap-x-1">
 				<div className="flex flex-col justify-between text-center leading-none">
-					{tipster_stats?.yield && (
-						<>
-							<p className="text-xl font-bc font-semibold leading-tight truncate">
-								{tipster_stats?.yield}%
-							</p>
-							<span className="text-[.7rem] font-medium truncate">
-								{t('Yield')}
-							</span>
-						</>
-					)}
+					{typeof tipster_stats?.yield === 'number' && (
+	<>
+		<p className="text-xl font-bc font-semibold leading-tight truncate">
+			{tipster_stats.yield}%
+		</p>
+		<span className="text-[.7rem] font-medium truncate">{t('Yield')}</span>
+	</>
+)}
 				</div>
 
 				<div className="flex flex-col justify-between text-center leading-none">
-					{tipster_stats?.profit && (
-						<>
-							<p className="text-green-500 text-xl font-bc font-semibold leading-tight truncate">
-								+{tipster_stats?.profit}
-							</p>
-							<span className="text-[.7rem] font-medium truncate">
-								{t('Beneficio')}
-							</span>
-						</>
-					)}
+					{typeof tipster_stats?.profit === 'number' && (
+	<>
+		<p
+			className={cn(
+				"text-xl font-bc font-semibold leading-tight truncate",
+				tipster_stats.profit >= 0 ? "text-green-500" : "text-red-500"
+			)}
+		>
+			{tipster_stats.profit >= 0 ? '+' : ''}
+			{tipster_stats.profit}
+		</p>
+		<span className="text-[.7rem] font-medium truncate">{t('Beneficio')}</span>
+	</>
+)}
 				</div>
 
 				<div className="flex flex-col justify-between text-center leading-none">
