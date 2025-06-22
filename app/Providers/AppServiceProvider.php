@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Auth\Notifications\VerifyEmail;
+use App\Models\Pick;
+use App\Observers\PickObserver;
 use Illuminate\Notifications\Messages\MailMessage;
 use App\Traits\NotificationTrait;
 use App\Models\EmailTemplate;
@@ -25,12 +27,17 @@ class AppServiceProvider extends ServiceProvider
 		}
 	}
 
+	
+
 	/**
 	 * Bootstrap any application services.
 	 */
 	public function boot(): void
 	{
 		Schema::defaultStringLength(191);
+
+		// Registrar observer para el modelo Pick
+	Pick::observe(PickObserver::class);
 
 		// Gate::before(function ($user, $ability) {
 		// 	return $user->hasRole('Super Admin') ? true : null;
