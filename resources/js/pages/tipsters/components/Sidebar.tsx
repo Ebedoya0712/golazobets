@@ -88,72 +88,69 @@ export const Sidebar = () => {
 
 				{/* Profit */}
 				<Slider
-					label={t('Beneficio')}
-					color="primary"
-					size="sm"
-					showTooltip
-					minValue={0}
-					maxValue={500}
-					className="w-full"
-					onChangeEnd={(val: number | number[]) => {
-						if (Array.isArray(val)) {
-							setFilters({ ...filters, profit: val[0] })
-						} else {
-							setFilters({ ...filters, profit: val })
-						}
-					}}
-					classNames={{
-						labelWrapper: 'justify-start gap-x-2',
-						label: 'after:content-[":"]',
-						value: 'font-bold',
-					}}
-				/>
+  label={t('Beneficio')}
+  color="primary"
+  size="sm"
+  showTooltip
+  minValue={-100}
+  maxValue={500}
+  className="w-full"
+  value={filters.profit}
+  onChangeEnd={(val: number | number[]) => {
+    const v = Array.isArray(val) ? val[0] : val;
+    setFilters({ ...filters, profit: v });
+  }}
+  classNames={{
+    labelWrapper: 'justify-start gap-x-2',
+    label: 'after:content-[":"]',
+    value: 'font-bold',
+  }}
+/>
+
 
 				{/* Picks */}
 				<Slider
-					label={t('Apuestas')}
-					color="primary"
-					size="sm"
-					showTooltip
-					minValue={0}
-					maxValue={500}
-					className="w-full"
-					onChangeEnd={(val: number | number[]) => {
-						if (Array.isArray(val)) {
-							setFilters({ ...filters, picks: val[0] })
-						} else {
-							setFilters({ ...filters, picks: val })
-						}
-					}}
-					classNames={{
-						labelWrapper: 'justify-start gap-x-2',
-						label: 'after:content-[":"]',
-						value: 'font-bold',
-					}}
-				/>
+  label={t('Apuestas')}
+  color="primary"
+  size="sm"
+  showTooltip
+  minValue={0}
+  maxValue={500}
+  className="w-full"
+  value={filters.picks} // 👈 ¡Agregado!
+  onChangeEnd={(val: number | number[]) => {
+    const v = Array.isArray(val) ? val[0] : val;
+    setFilters({ ...filters, picks: v });
+  }}
+  classNames={{
+    labelWrapper: 'justify-start gap-x-2',
+    label: 'after:content-[":"]',
+    value: 'font-bold',
+  }}
+/>
+
 
 				{/* Yield */}
 				<Slider
-					label={t('Yield')}
-					color="primary"
-					size="sm"
-					showTooltip
-					minValue={0}
-					maxValue={500}
-					className="w-full"
-					onChangeEnd={(val: number | number[]) => {
-						if (Array.isArray(val)) {
-							setFilters({ ...filters, yield: val[0] })
-						} else {
-							setFilters({ ...filters, yield: val })
-						}
-					}}
-					classNames={{
-						labelWrapper: 'justify-start gap-x-2',
-						label: 'after:content-[":"]',
-						value: 'font-bold',
-					}}
-				/>
+  label={t('Yield')}
+  color="primary"
+  size="sm"
+  showTooltip
+  minValue={-100}
+  maxValue={500}
+  className="w-full"
+  value={filters.yield} // 👈 ¡Agregado!
+  onChangeEnd={(val: number | number[]) => {
+    const v = Array.isArray(val) ? val[0] : val;
+    setFilters({ ...filters, yield: v });
+  }}
+  classNames={{
+    labelWrapper: 'justify-start gap-x-2',
+    label: 'after:content-[":"]',
+    value: 'font-bold',
+  }}
+/>
+
 
 				<Button
 					fullWidth

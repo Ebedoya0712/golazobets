@@ -115,73 +115,70 @@ class TipsterService
 	 * -------------------------------------------------------------------------------
 	 */
 	public function getTipstersWithFilters($request, $type)
-	{
-		$filters = $request->filters;
+{
+	$filters = $request->filters;
 
-		$query = Tipster::whereHas('tipster_stats')
-			->where('type', $type)
-			->with(['user', 'user.account', 'sport', 'tipster_stats']);
+	$query = Tipster::whereHas('tipster_stats')
+		->where('type', $type)
+		->with(['user', 'user.account', 'sport', 'tipster_stats']);
 
-		// Filter by sport ID
-		if (isset($filters['sport_id']) && $filters['sport_id'] !== '0') {
-			$query->where('sport_id', $filters['sport_id']);
-		}
+	// Filter by sport ID
+	if (isset($filters['sport_id']) && $filters['sport_id'] !== '0') {
+		$query->where('sport_id', $filters['sport_id']);
+	}
 
-		// Filter by name
-		if (isset($filters['username'])) {
-			$query->whereHas('user', function ($query) use ($filters) {
-				$query->where('username', 'like', '%' . $filters['username'] . '%');
-			});
-		}
+	// Filter by username
+	if (!empty($filters['username'])) {
+		$query->whereHas('user', function ($query) use ($filters) {
+			$query->where('username', 'like', '%' . $filters['username'] . '%');
+		});
+	}
 
-		if (isset($filters['order_by'])) {
-			// Check if we need to order by the number of picks
-			// This orders tipsters by their total number of picks in descending order
-			if ($filters['order_by'] === 'picks') {
-				$query->orderBy('picks_count', 'desc');
-			} else {
-				// Handle ordering by other fields (profit, yield)
-				$query->whereHas('tipster_stats', function ($query) use ($filters) {
-					$field = $filters['order_by'];
-					$validFields = ['profit', 'yield'];
+	// Order by field
+	if (isset($filters['order_by'])) {
+		if ($filters['order_by'] === 'picks') {
+			$query->orderBy('picks_count', 'desc');
+		} else {
+			$field = $filters['order_by'];
+			$validFields = ['profit', 'yield'];
 
-					if (in_array($field, $validFields)) {
-						$query->where($field, '>=', $filters[$field] ?? 0);
-					}
-				})
-					->join('tipster_stats', 'tipsters.id', '=', 'tipster_stats.tipster_id')
-					->orderBy('tipster_stats.' . $filters['order_by'], 'desc');
+			if (in_array($field, $validFields)) {
+				$query->join('tipster_stats', 'tipsters.id', '=', 'tipster_stats.tipster_id')
+					  ->orderBy('tipster_stats.' . $field, 'desc');
 			}
 		}
-
-		if (isset($filters['profit'])) {
-			$query->whereHas('tipster_stats', function ($query) use ($filters) {
-				$query->where('profit', '>=', $filters['profit']);
-			});
-		}
-
-		if (isset($filters['picks'])) {
-			$query->whereHas('picks', function ($query) use ($filters) {
-				$query->havingRaw('COUNT(*) >= ?', [$filters['picks']]);
-			}, '>=', $filters['picks']);
-		}
-
-		if (isset($filters['yield'])) {
-			$query->whereHas('tipster_stats', function ($query) use ($filters) {
-				$query->where('yield', '>=', $filters['yield']);
-			});
-		}
-
-		$tipsters = $query
-			->withCount('picks')
-			->paginate($this->per_page, ['*'], 'page', 1)
-			->toArray();
-
-
-		$tipsters['data'] = array_map(fn($tipster) => TipsterData::from($tipster), $tipsters['data']);
-
-		return $tipsters;
 	}
+
+	// Filter by profit (allow negatives, ignore 0)
+	if (isset($filters['profit']) && $filters['profit'] !== 0) {
+		$query->whereHas('tipster_stats', function ($query) use ($filters) {
+			$query->where('profit', '>=', $filters['profit']);
+		});
+	}
+
+	// Filter by picks count
+	if (isset($filters['picks'])) {
+		$query->whereHas('picks', function ($query) use ($filters) {
+			$query->havingRaw('COUNT(*) >= ?', [$filters['picks']]);
+		}, '>=', $filters['picks']);
+	}
+
+	// Filter by yield (allow negatives, ignore 0)
+	if (isset($filters['yield']) && $filters['yield'] !== 0) {
+		$query->whereHas('tipster_stats', function ($query) use ($filters) {
+			$query->where('yield', '>=', $filters['yield']);
+		});
+	}
+
+	$tipsters = $query
+		->withCount('picks')
+		->paginate($this->per_page, ['*'], 'page', 1)
+		->toArray();
+
+	$tipsters['data'] = array_map(fn($tipster) => TipsterData::from($tipster), $tipsters['data']);
+
+	return $tipsters;
+}
 
 
 	/**

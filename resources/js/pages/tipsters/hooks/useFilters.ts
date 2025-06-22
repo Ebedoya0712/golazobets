@@ -6,18 +6,18 @@ import type { FilterProps } from '@/types/tipsters'
 
 export const useFilters = () => {
 	const { props } = usePage<PageProps>()
-	const { filters: requestFilters } = props
+const { filters: requestFilters } = props
 
-	const [filters, setFilters] = useState<FilterProps>(
-		requestFilters ?? {
-			username: '',
-			order_by: null,
-			sport_id: null,
-			profit: 0,
-			picks: 0,
-			yield: 0,
-		}
-	)
+const normalizedFilters: FilterProps = {
+	username: requestFilters?.username ?? '',
+	order_by: requestFilters?.order_by ?? '',
+	sport_id: requestFilters?.sport_id ?? '0',
+	profit: requestFilters?.profit ?? 0,
+	picks: requestFilters?.picks ?? 0,
+	yield: requestFilters?.yield ?? 0,
+}
+
+const [filters, setFilters] = useState<FilterProps>(normalizedFilters)
 	const firstRender = useRef(true)
 
 	const filterResults = () => {
