@@ -12,17 +12,16 @@ interface Props {
 
 const pageTitle = 'Forgot your password?'
 
-const mensajesStatus = {
+const mensajesStatus: Record<string, string> = {
   "We have emailed your password reset link.": "Te hemos enviado un enlace para restablecer tu contraseña.",
   "Correo de recuperación enviado correctamente.": "Correo de recuperación enviado correctamente.",
-  // más traducciones si quieres
 }
 
-const mensajesErrores = {
+const mensajesErrores: Record<string, string> = {
   "The email field is required.": "El campo email es obligatorio.",
   "The email must be a valid email address.": "El email debe ser una dirección válida.",
-  // agrega aquí más errores que quieras traducir
 }
+
 
 const Page = ({ status, layout }: Props) => {
 	const { data, setData, post, processing, errors, reset } = useForm({
@@ -41,7 +40,7 @@ const Page = ({ status, layout }: Props) => {
 
 		post(route('password.email'), {
 			onSuccess: (page) => {
-				setLocalStatus(page.props.status || null)
+				setLocalStatus(typeof page.props.status === 'string' ? page.props.status : null);
 				reset()
 			},
 		})

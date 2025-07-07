@@ -763,7 +763,7 @@ const Page = () => {
 
 <p className="mb-6 text-justify leading-relaxed font-bold">11. Legislación Aplicable y Jurisdicción</p>
 
-<p class="mb-4 text-gray-700">
+<p className="mb-4 text-gray-700">
   Las presentes Condiciones Generales de Uso se rigen por la ley española. En lo no  
   previsto específicamente, resultarán de aplicación la Ley 34/2002 (LSSI), la Ley  
   7/1998 sobre Condiciones Generales de Contratación, el Real Decreto Legislativo  
@@ -777,7 +777,7 @@ const Page = () => {
   (España).
 </p>
 
-<p class="mb-4 text-gray-700">
+<p className="mb-4 text-gray-700">
   No obstante, si el usuario tiene la consideración de consumidor y reside  
   habitualmente en otro Estado miembro de la Unión Europea, podría optar por  
   promover la acción legal en los tribunales de su domicilio conforme al Reglamento  
@@ -786,7 +786,7 @@ const Page = () => {
   negociación de buena fe.
 </p>
 
-<p class="mb-4 text-gray-700 font-semibold">
+<p className="mb-4 text-gray-700 font-semibold">
   Mayoría de edad: Finalmente, se recuerda nuevamente  
   que el acceso a la plataforma está restringido a mayores de 18 años.  
   GOLAZOBETS exhibe en su sitio web los distintivos de +18 y mensajes de juego  
@@ -794,7 +794,7 @@ const Page = () => {
   menores.
 </p>
 
-<p class="mb-4 text-gray-700 font-semibold">
+<p className="mb-4 text-gray-700 font-semibold">
   Aceptación: La marcación de la casilla de aceptación de términos o el  
   hecho de continuar usando la plataforma implica que usted ha leído, comprendido y  
   aceptado estas Condiciones Generales de Uso en toda su extensión. Gracias por  
