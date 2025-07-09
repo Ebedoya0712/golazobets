@@ -155,7 +155,7 @@ export const Header = () => {
 					<div>
 						<div className="text-3xl font-bc truncate">
 							{tipster_stats?.profit
-								? '+' + String(tipster_stats.profit).replace('.', ',') + ' usd'
+								? '+' + String(tipster_stats.profit).replace('.', ',') + ' uds'
 								: '...'}
 						</div>
 						<div className="text-primary-200 text-lg font-bc font-semibold uppercase">

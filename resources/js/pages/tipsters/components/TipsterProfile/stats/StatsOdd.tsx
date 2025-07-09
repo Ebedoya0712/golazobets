@@ -100,7 +100,7 @@ export const StatsOdd = () => {
 					columns: [
 						{ key: 'odd', label: 'Cuota' },
 						{ key: 'total_picks', label: 'Apuestas' },
-						{ key: 'profit', label: 'Beneficio (USD)' },
+						{ key: 'profit', label: 'Beneficio (UDS)' },
 						{ key: 'yield', label: 'Yield' },
 						{ key: 'average_stake', label: 'Stake medio' },
 						{ key: 'average_odds', label: 'Cuota media' },

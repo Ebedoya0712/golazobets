@@ -52,7 +52,7 @@ export const StatsMoment = () => {
 					columns: [
 						{ key: 'bet_type', label: 'Tipo' },
 						{ key: 'total_picks', label: 'Apuestas' },
-						{ key: 'profit', label: 'Beneficio (USD)' },
+						{ key: 'profit', label: 'Beneficio (UDS)' },
 						{ key: 'yield', label: 'Yield' },
 						{ key: 'average_stake', label: 'Stake medio' },
 						{ key: 'average_odds', label: 'Cuota media' },

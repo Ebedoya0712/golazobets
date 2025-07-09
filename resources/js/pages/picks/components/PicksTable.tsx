@@ -85,7 +85,7 @@ export const PicksTable = () => {
 							case 'profit':
 								return (
 									<span className="truncate block">
-										{item.profit || '0,00'} usd
+										{item.profit || '0,00'} uds
 									</span>
 								)
 

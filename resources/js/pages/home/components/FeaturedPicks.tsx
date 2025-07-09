@@ -12,6 +12,7 @@ export const FeaturedPicks = () => {
 	const { featuredPicks } = props as unknown as {
 		featuredPicks: Pick[]
 	}
+	const user = props.auth?.user
 
 	const pick = featuredPicks[0]
 	const picks = featuredPicks.slice(1)
@@ -70,7 +71,7 @@ export const FeaturedPicks = () => {
 										{pick.competition} - {pick.event}
 									</h4>
 									<p className="text-gray-400 text-xs font-medium truncate">
-										Andrés Gonzáles
+										{user?.name ?? ''}
 									</p>
 								</div>
 							</div>
@@ -117,7 +118,7 @@ export const FeaturedPicks = () => {
 												{pick.competition}-{pick.event}
 											</h4>
 											<p className="text-gray-400 text-xs font-medium truncate">
-												Andrés Gonzáles
+												{user?.name ?? ''}
 											</p>
 										</div>
 									</div>

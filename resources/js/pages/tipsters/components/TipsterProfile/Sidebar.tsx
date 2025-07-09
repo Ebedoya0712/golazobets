@@ -36,7 +36,7 @@ export const Sidebar = () => {
 			<div className="sticky top-20 space-y-5">
 				<div className="flex justify-between items-end font-bold">
 					<div className="">Balance</div>
-					<div className="">+{profit} usd</div>
+					<div className="">+{profit} uds</div>
 				</div>
 
 				{/* <ReactApexChart

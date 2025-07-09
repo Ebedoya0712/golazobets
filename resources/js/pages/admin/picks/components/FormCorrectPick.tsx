@@ -28,18 +28,23 @@ export const FormCorrectPick = ({
 	const { data, setData, patch, processing, reset } = useForm({ status: '' })
 
 	const submit = () => {
-		if (data.status === '' || data.status === selectedPick?.status) return
+  if (data.status === '' || data.status === selectedPick?.status) return
 
-		patch(route('admin.picks.correct', { pick: selectedPick }), {
-			only: ['picks'],
-			preserveScroll: true,
-			onSuccess: () => {
-				reset()
-				onOpenChange(false)
-				setSelectedPick(null)
-			},
-		})
-	}
+  patch(route('admin.picks.correct', { pick: selectedPick }), {
+    only: ['picks'],
+    preserveScroll: true,
+    onSuccess: () => {
+      reset()
+      setSelectedPick(null)
+      onOpenChange(false) // Este debe cerrar el modal
+    },
+    onError: () => {
+      console.error('Error al actualizar pick')
+      onOpenChange(false) // Incluso si falla, cerramos para probar
+    },
+  })
+}
+
 
 	return (
 		<Modal {...{ isOpen, size: 'lg', hideCloseButton: true }}>
